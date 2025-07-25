@@ -34,6 +34,11 @@ public class Log4j2LoggerImpl implements Log {
     log = logger;
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
@@ -48,6 +53,11 @@ public class Log4j2LoggerImpl implements Log {
 
   public void error(String s) {
     log.error(MARKER, s);
+  }
+
+  @Override
+  public void info(String s) {
+    log.info(MARKER, s);
   }
 
   public void debug(String s) {

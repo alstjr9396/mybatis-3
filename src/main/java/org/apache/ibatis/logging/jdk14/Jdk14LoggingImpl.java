@@ -31,6 +31,11 @@ public class Jdk14LoggingImpl implements Log {
     log = Logger.getLogger(clazz);
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return log.isLoggable(Level.INFO);
+  }
+
   public boolean isDebugEnabled() {
     return log.isLoggable(Level.FINE);
   }
@@ -45,6 +50,11 @@ public class Jdk14LoggingImpl implements Log {
 
   public void error(String s) {
     log.log(Level.SEVERE, s);
+  }
+
+  @Override
+  public void info(String s) {
+    log.log(Level.INFO, s);
   }
 
   public void debug(String s) {

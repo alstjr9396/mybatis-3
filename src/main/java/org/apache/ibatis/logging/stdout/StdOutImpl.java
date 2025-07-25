@@ -25,6 +25,11 @@ public class StdOutImpl implements Log {
   public StdOutImpl(String clazz) {
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return true;
+  }
+
   public boolean isDebugEnabled() {
     return true;
   }
@@ -40,6 +45,11 @@ public class StdOutImpl implements Log {
 
   public void error(String s) {
     System.err.println(s);
+  }
+
+  @Override
+  public void info(String s) {
+    System.out.println(s);
   }
 
   public void debug(String s) {

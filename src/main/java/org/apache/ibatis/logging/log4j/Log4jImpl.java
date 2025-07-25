@@ -32,6 +32,11 @@ public class Log4jImpl implements Log {
     log = Logger.getLogger(clazz);
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
@@ -46,6 +51,11 @@ public class Log4jImpl implements Log {
 
   public void error(String s) {
     log.log(FQCN, Level.ERROR, s, null);
+  }
+
+  @Override
+  public void info(String s) {
+    log.log(FQCN, Level.INFO, s, null);
   }
 
   public void debug(String s) {

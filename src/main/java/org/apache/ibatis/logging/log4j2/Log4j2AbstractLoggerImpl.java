@@ -39,6 +39,11 @@ public class Log4j2AbstractLoggerImpl implements Log {
     log = new AbstractLoggerWrapper(abstractLogger, abstractLogger.getName(), abstractLogger.getMessageFactory());
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
@@ -53,6 +58,11 @@ public class Log4j2AbstractLoggerImpl implements Log {
 
   public void error(String s) {
     log.log(MARKER, FQCN, Level.ERROR, new SimpleMessage(s), null);
+  }
+
+  @Override
+  public void info(String s) {
+    log.log(MARKER, FQCN, Level.INFO, new SimpleMessage(s), null);
   }
 
   public void debug(String s) {

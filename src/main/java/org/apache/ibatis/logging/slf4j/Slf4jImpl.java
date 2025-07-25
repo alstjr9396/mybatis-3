@@ -49,6 +49,11 @@ public class Slf4jImpl implements Log {
     log = new Slf4jLoggerImpl(logger);
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
@@ -63,6 +68,11 @@ public class Slf4jImpl implements Log {
 
   public void error(String s) {
     log.error(s);
+  }
+
+  @Override
+  public void info(String s) {
+    log.info(s);
   }
 
   public void debug(String s) {

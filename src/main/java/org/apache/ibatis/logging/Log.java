@@ -20,6 +20,8 @@ package org.apache.ibatis.logging;
  */
 public interface Log {
 
+  boolean isInfoEnabled();
+
   boolean isDebugEnabled();
 
   boolean isTraceEnabled();
@@ -27,6 +29,8 @@ public interface Log {
   void error(String s, Throwable e);
 
   void error(String s);
+
+  void info(String s);
 
   void debug(String s);
 

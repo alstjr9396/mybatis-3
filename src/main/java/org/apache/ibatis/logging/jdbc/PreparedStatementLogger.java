@@ -35,10 +35,12 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 public final class PreparedStatementLogger extends BaseJdbcLogger implements InvocationHandler {
 
   private PreparedStatement statement;
+  private final String preparedSql;
 
-  private PreparedStatementLogger(PreparedStatement stmt, Log statementLog, int queryStack) {
+  private PreparedStatementLogger(PreparedStatement stmt, Log statementLog, int queryStack, String preparedSql) {
     super(statementLog, queryStack);
     this.statement = stmt;
+    this.preparedSql = preparedSql;
   }
 
   public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
@@ -47,8 +49,8 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
         return method.invoke(this, params);
       }          
       if (EXECUTE_METHODS.contains(method.getName())) {
-        if (isDebugEnabled()) {
-          debug("Parameters: " + getParameterValueString(), true);
+        if (isInfoEnabled()) {
+          info("SQL: \n" + bindSqlParameters(preparedSql), true);
         }
         clearColumnInfo();
         if ("executeQuery".equals(method.getName())) {
@@ -96,8 +98,8 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
    * @param sql  - the sql statement
    * @return - the proxy
    */
-  public static PreparedStatement newInstance(PreparedStatement stmt, Log statementLog, int queryStack) {
-    InvocationHandler handler = new PreparedStatementLogger(stmt, statementLog, queryStack);
+  public static PreparedStatement newInstance(PreparedStatement stmt, Log statementLog, int queryStack, String preparedSql) {
+    InvocationHandler handler = new PreparedStatementLogger(stmt, statementLog, queryStack, preparedSql);
     ClassLoader cl = PreparedStatement.class.getClassLoader();
     return (PreparedStatement) Proxy.newProxyInstance(cl, new Class[]{PreparedStatement.class, CallableStatement.class}, handler);
   }

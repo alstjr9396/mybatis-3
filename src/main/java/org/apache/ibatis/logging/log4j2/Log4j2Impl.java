@@ -37,6 +37,11 @@ public class Log4j2Impl implements Log {
     }
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
@@ -51,6 +56,11 @@ public class Log4j2Impl implements Log {
 
   public void error(String s) {
     log.error(s);
+  }
+
+  @Override
+  public void info(String s) {
+    log.info(s);
   }
 
   public void debug(String s) {

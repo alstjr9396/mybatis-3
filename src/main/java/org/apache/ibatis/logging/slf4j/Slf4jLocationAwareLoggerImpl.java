@@ -36,6 +36,11 @@ class Slf4jLocationAwareLoggerImpl implements Log {
     this.logger = logger;
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return logger.isInfoEnabled();
+  }
+
   public boolean isDebugEnabled() {
     return logger.isDebugEnabled();
   }
@@ -50,6 +55,11 @@ class Slf4jLocationAwareLoggerImpl implements Log {
 
   public void error(String s) {
     logger.log(MARKER, FQCN, LocationAwareLogger.ERROR_INT, s, null, null);
+  }
+
+  @Override
+  public void info(String s) {
+    logger.log(MARKER, FQCN, LocationAwareLogger.INFO_INT, s, null, null);
   }
 
   public void debug(String s) {

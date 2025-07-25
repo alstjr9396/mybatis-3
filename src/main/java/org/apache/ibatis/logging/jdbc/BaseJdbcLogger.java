@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.ibatis.logging.Log;
 
 /**
@@ -116,14 +118,106 @@ public abstract class BaseJdbcLogger {
     columnValues.clear();
   }
 
-  protected String removeBreakingWhitespace(String original) {
-    StringTokenizer whitespaceStripper = new StringTokenizer(original);
-    StringBuilder builder = new StringBuilder();
-    while (whitespaceStripper.hasMoreTokens()) {
-      builder.append(whitespaceStripper.nextToken());
-      builder.append(" ");
+  protected String bindSqlParameters(String original) {
+    if (!(this instanceof PreparedStatementLogger)) {
+      return leftTrimMultiline(original);
     }
-    return builder.toString();
+    String sql = leftTrimMultiline(original);
+    StringBuffer output = new StringBuffer();
+    Matcher placeholderMatcher = Pattern.compile("\\?").matcher(sql);
+
+    int paramIndex = 0;
+    int paramCount = this.columnValues.size();
+    while (placeholderMatcher.find()) {
+      String replacement = (paramIndex < paramCount) ? formatParameterValue(this.columnValues.get(paramIndex++)) : "[Output]";
+      placeholderMatcher.appendReplacement(output, Matcher.quoteReplacement(replacement));
+    }
+
+    placeholderMatcher.appendTail(output);
+    return output.toString();
+  }
+
+
+  private String formatParameterValue(Object value) {
+    if (value == null) {
+      return "null";
+    }
+
+    if (value instanceof Number) {
+      return value.toString();
+    }
+
+    // 문자열 또는 기타 객체 → SQL 문자열 처리 ('값')
+    String str = value.toString().replace("$", "\\$");
+    return "'" + str + "'";
+  }
+
+  public static String leftTrimMultiline(String str) {
+    if (str == null || str.length() == 0) {
+      return str;
+    }
+
+    String[] lines = str.split("\\r?\\n");
+    List<String> nonEmptyLines = new ArrayList<String>();
+
+    // 유효한 줄만 추출
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+      if (line.trim().length() > 0) {
+        nonEmptyLines.add(line);
+      }
+    }
+
+    // 모두 공백일 경우
+    if (nonEmptyLines.size() == 0) {
+      return "";
+    }
+
+    // 공통 들여쓰기 최소값 계산
+    int minIndent = Integer.MAX_VALUE;
+    for (int i = 0; i < nonEmptyLines.size(); i++) {
+      String line = nonEmptyLines.get(i);
+      int leadingSpaces = getLeadingWhitespaceWidth(line);
+      if (leadingSpaces < minIndent) {
+        minIndent = leadingSpaces;
+      }
+    }
+
+    // 들여쓰기 제거
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+      if (line.length() >= minIndent) {
+        result.append(line.substring(minIndent));
+      } else {
+        result.append(line.trim());
+      }
+      result.append('\n');
+    }
+
+    return result.toString().trim();
+  }
+
+  /**
+   * 왼쪽 공백 개수 계산 (탭은 4칸으로 처리)
+   */
+  private static int getLeadingWhitespaceWidth(String line) {
+    int count = 0;
+    for (int i = 0; i < line.length(); i++) {
+      char ch = line.charAt(i);
+      if (ch == ' ') {
+        count += 1;
+      } else if (ch == '\t') {
+        count += 4;
+      } else {
+        break;
+      }
+    }
+    return count;
+  }
+
+  protected boolean isInfoEnabled() {
+    return statementLog.isInfoEnabled();
   }
 
   protected boolean isDebugEnabled() {
@@ -132,6 +226,12 @@ public abstract class BaseJdbcLogger {
 
   protected boolean isTraceEnabled() {
     return statementLog.isTraceEnabled();
+  }
+
+  protected void info(String text, boolean input) {
+    if (statementLog.isInfoEnabled()) {
+      statementLog.info(prefix(input) + text);
+    }
   }
 
   protected void debug(String text, boolean input) {
