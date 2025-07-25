@@ -25,6 +25,11 @@ public class NoLoggingImpl implements Log {
   public NoLoggingImpl(String clazz) {
   }
 
+  @Override
+  public boolean isInfoEnabled() {
+    return false;
+  }
+
   public boolean isDebugEnabled() {
     return false;
   }
@@ -37,6 +42,10 @@ public class NoLoggingImpl implements Log {
   }
 
   public void error(String s) {
+  }
+
+  @Override
+  public void info(String s) {
   }
 
   public void debug(String s) {
