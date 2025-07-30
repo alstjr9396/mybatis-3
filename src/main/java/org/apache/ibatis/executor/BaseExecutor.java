@@ -17,6 +17,9 @@ package org.apache.ibatis.executor;
 
 import static org.apache.ibatis.executor.ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,6 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.logging.jdbc.ConnectionLogger;
@@ -286,6 +290,40 @@ public abstract class BaseExecutor implements Executor {
   
   public void setExecutorWrapper(Executor wrapper) {
     this.wrapper = wrapper;
+  }
+
+  protected boolean isNoLogging(StatementHandler handler) {
+    try {
+      Field delegateField = handler.getClass().getDeclaredField("delegate");
+      delegateField.setAccessible(true);
+      Object delegate = delegateField.get(handler);
+
+      Field msField = delegate.getClass().getSuperclass().getDeclaredField("mappedStatement");
+      msField.setAccessible(true);
+      MappedStatement ms = (MappedStatement) msField.get(delegate);
+      if (ms.getNoLogging()) {
+        return true;
+      }
+      return false;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  protected Connection unwrapConnection(Connection conn) {
+    if (Proxy.isProxyClass(conn.getClass())) {
+      InvocationHandler handler = Proxy.getInvocationHandler(conn);
+      if (handler.getClass().getSimpleName().equals("ConnectionLogger")) {
+        try {
+          Field connField = handler.getClass().getDeclaredField("connection");
+          connField.setAccessible(true);
+          return (Connection) connField.get(handler);
+        } catch (Exception e) {
+          // ignore and return original
+        }
+      }
+    }
+    return conn;
   }
   
   private static class DeferredLoad {

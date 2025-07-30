@@ -18,11 +18,14 @@ package org.apache.ibatis.session;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
+import org.apache.ibatis.annotations.NoLogging;
 import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
+import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 
 /*
@@ -91,6 +94,17 @@ public class SqlSessionFactoryBuilder {
   }
     
   public SqlSessionFactory build(Configuration config) {
+    for (Class<?> mapperClass : config.getMapperRegistry().getMappers()) {
+      for (Method method : mapperClass.getDeclaredMethods()) {
+        if (method.isAnnotationPresent(NoLogging.class)) {
+          String msId = mapperClass.getName() + "." + method.getName();
+          if (config.hasStatement(msId)) {
+            MappedStatement ms = config.getMappedStatement(msId);
+            ms.setNoLogging(true);
+          }
+        }
+      }
+    }
     return new DefaultSqlSessionFactory(config);
   }
 

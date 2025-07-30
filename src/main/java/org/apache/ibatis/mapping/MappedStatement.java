@@ -56,6 +56,7 @@ public final class MappedStatement {
   private Log statementLog;
   private LanguageDriver lang;
   private String[] resultSets;
+  private boolean noLogging;
 
   private MappedStatement() {
     // constructor disabled
@@ -169,6 +170,11 @@ public final class MappedStatement {
 
     public Builder resulSets(String resultSet) {
       mappedStatement.resultSets = delimitedStringtoArray(resultSet);
+      return this;
+    }
+
+    public Builder noLogging(boolean noLogging) {
+      mappedStatement.noLogging = noLogging;
       return this;
     }
     
@@ -295,6 +301,10 @@ public final class MappedStatement {
     return boundSql;
   }
 
+  public boolean getNoLogging() {
+    return noLogging;
+  }
+
   private static String[] delimitedStringtoArray(String in) {
     if (in == null || in.trim().length() == 0) {
       return null;
@@ -302,6 +312,10 @@ public final class MappedStatement {
       String[] answer = in.split(",");
       return answer;
     }
+  }
+
+  public void setNoLogging(boolean noLogging) {
+    this.noLogging = noLogging;
   }
 
 }

@@ -44,6 +44,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Lang;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.NoLogging;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.ResultMap;
@@ -302,6 +303,8 @@ public class MapperAnnotationBuilder {
         resultMapId = parseResultMap(method);
       }
 
+      boolean hasNoLogging = method.isAnnotationPresent(NoLogging.class);
+
       assistant.addMappedStatement(
           mappedStatementId,
           sqlSource,
@@ -322,7 +325,8 @@ public class MapperAnnotationBuilder {
           keyColumn,
           null,
           languageDriver,
-          null);
+          null,
+          hasNoLogging);
     }
   }
   
@@ -574,7 +578,7 @@ public class MapperAnnotationBuilder {
 
     assistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum,
         flushCache, useCache, false,
-        keyGenerator, keyProperty, keyColumn, null, languageDriver, null);
+        keyGenerator, keyProperty, keyColumn, null, languageDriver, null, false);
 
     id = assistant.applyCurrentNamespace(id, false);
 

@@ -73,7 +73,11 @@ public class ReuseExecutor extends BaseExecutor {
       stmt = getStatement(sql);
     } else {
       Connection connection = getConnection(statementLog);
-      stmt = handler.prepare(connection);
+      if (isNoLogging(handler)) {
+        stmt = handler.prepare(unwrapConnection(connection));
+      } else {
+        stmt = handler.prepare(connection);
+      }
       putStatement(sql, stmt);
     }
     handler.parameterize(stmt);

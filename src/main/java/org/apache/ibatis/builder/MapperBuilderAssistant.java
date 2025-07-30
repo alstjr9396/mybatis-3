@@ -260,7 +260,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       String keyColumn,
       String databaseId,
       LanguageDriver lang,
-      String resultSets) {
+      String resultSets,
+      boolean noLogging) {
     
     if (unresolvedCacheRef) throw new IncompleteElementException("Cache-ref not yet resolved");
     
@@ -278,6 +279,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     statementBuilder.lang(lang);
     statementBuilder.resultOrdered(resultOrdered);
     statementBuilder.resulSets(resultSets);
+    statementBuilder.noLogging(noLogging);
     setStatementTimeout(timeout, statementBuilder);
 
     setStatementParameterMap(parameterMap, parameterType, statementBuilder);
@@ -510,12 +512,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
     String keyProperty,
     String keyColumn,
     String databaseId,
-    LanguageDriver lang) {
+    LanguageDriver lang,
+    boolean noLogging) {
     return addMappedStatement(
       id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, 
       parameterMap, parameterType, resultMap, resultType, resultSetType, 
       flushCache, useCache, resultOrdered, keyGenerator, keyProperty, 
-      keyColumn, databaseId, lang, null);
+      keyColumn, databaseId, lang, null, noLogging);
   }
 
 }
